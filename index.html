@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍅 番茄王国 - 社交互动版</title>
+    <title>🍅 番茄王国 - 完整版</title>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
@@ -623,28 +625,581 @@
             border: 1px solid #f0f0f0;
             border-radius: 12px;
         }
+
+        /* ===== 新增：数据录入页面样式 ===== */
+        .data-entry-section {
+            background: linear-gradient(135deg, #E0F7FA, #B2EBF2);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .height-slider-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            padding: 24px;
+            background: white;
+            border-radius: 16px;
+        }
+
+        .ruler-marks {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 300px;
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .height-display {
+            text-align: center;
+        }
+
+        .height-display .value {
+            font-size: 48px;
+            font-weight: bold;
+            color: #FF6347;
+        }
+
+        .height-display .unit {
+            font-size: 18px;
+            color: #666;
+        }
+
+        .stepper-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .stepper-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .stepper-btn.minus {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .stepper-btn.plus {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .stepper-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .stepper-value {
+            font-size: 32px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        /* ===== 新增：可视化页面样式 ===== */
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-card.green { background: linear-gradient(135deg, #D1FAE5, #A7F3D0); }
+        .stat-card.pink { background: linear-gradient(135deg, #FCE7F3, #FBCFE8); }
+        .stat-card.orange { background: linear-gradient(135deg, #FED7AA, #FDBA74); }
+        .stat-card.blue { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); }
+        .stat-card.purple { background: linear-gradient(135deg, #E9D5FF, #D8B4FE); }
+        .stat-card.yellow { background: linear-gradient(135deg, #FEF3C7, #FDE68A); }
+        .stat-card.red { background: linear-gradient(135deg, #FECACA, #FCA5A5); }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .insight-emoji {
+            font-size: 24px;
+        }
+
+        .insight-text {
+            flex: 1;
+            color: #92400E;
+            line-height: 1.6;
+        }
+
+        /* ===== 新增：学生仪表盘样式 ===== */
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar-large {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #FF6347, #FF4500);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .user-details h2 {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .user-details p {
+            color: #666;
+        }
+
+        .badge-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge-item {
+            background: #FEF3C7;
+            color: #92400E;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .progress-bar-container {
+            margin-bottom: 24px;
+        }
+
+        .progress-bar-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 16px;
+            background: #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 8px;
+            transition: width 0.5s;
+        }
+
+        .tomato-display {
+            background: linear-gradient(180deg, #87CEEB, #E0F7FA);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .tomato-plant {
+            font-size: 80px;
+            animation: sway 3s ease-in-out infinite;
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .quick-stat {
+            text-align: center;
+            padding: 12px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 12px;
+        }
+
+        .quick-stat-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .quick-stat-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .quick-stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .task-card {
+            background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .task-pending {
+            background: white;
+            border: 2px dashed #FF6347;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .task-completed {
+            background: #D1FAE5;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .action-card {
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        .action-card.red { background: linear-gradient(135deg, #FF6347, #FF4500); }
+        .action-card.green { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
+        .action-card.blue { background: linear-gradient(135deg, #2196F3, #1565C0); }
+        .action-card.purple { background: linear-gradient(135deg, #9C27B0, #6A1B9A); }
+
+        .action-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .action-label {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* ===== 新增：教师全景监控样式 ===== */
+        .monitor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .student-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .student-list-item:hover {
+            background: #f0f0f0;
+        }
+
+        .student-list-item.selected {
+            background: #FFE4E1;
+            border: 2px solid #FF6347;
+        }
+
+        .student-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-indicator.normal { background: #4CAF50; }
+        .status-indicator.warning { background: #FFC107; }
+        .status-indicator.error { background: #F44336; }
+
+        .student-detail-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .detail-section {
+            margin-bottom: 24px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .error-alert {
+            background: #FECACA;
+            border: 2px solid #F87171;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .error-icon {
+            font-size: 24px;
+        }
+
+        .error-content h4 {
+            color: #DC2626;
+            margin-bottom: 4px;
+        }
+
+        .error-content p {
+            color: #991B1B;
+            font-size: 14px;
+        }
+
+        /* ===== 新增：历史记录表格样式 ===== */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .history-table th {
+            background: #f9f9f9;
+            font-weight: bold;
+        }
+
+        .history-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .growth-positive {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .growth-negative {
+            color: #F44336;
+            font-weight: bold;
+        }
+
+        /* ===== 新增：预测弹窗样式 ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            animation: modalIn 0.3s;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .modal-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        /* ===== 新增：返回按钮样式 ===== */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            border-color: #FF6347;
+            color: #FF6347;
+        }
+
+        /* ===== 新增：浮动动画 ===== */
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .animate-pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,99,71,0.3); }
+            50% { box-shadow: 0 0 40px rgba(255,99,71,0.6); }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- 首页 -->
         <div id="landing" class="page active">
-            <div class="hero">
-                <h1>🍅 番茄王国</h1>
-                <p style="font-size: 18px; color: #666;">记录成长，分享发现，一起讨论</p>
+            <div class="hero animate-float">
+                <h1>🍅 番茄王国 🍅</h1>
+                <p style="font-size: 20px; color: #666; margin-bottom: 8px;">欢迎来到自然笔记</p>
+                <p style="font-size: 16px; color: #999;">记录成长，见证生命的奇迹</p>
             </div>
 
-            <div class="card" style="text-align: center;">
-                <p style="font-size: 18px; margin-bottom: 24px;">请选择你的身份</p>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                    <button class="btn btn-primary" onclick="loginAsStudent()" style="padding: 32px; font-size: 18px;">
-                        <div style="font-size: 48px; margin-bottom: 8px;">📱</div>
-                        学生端
-                    </button>
-                    <button class="btn btn-secondary" onclick="loginAsTeacher()" style="padding: 32px; font-size: 18px;">
-                        <div style="font-size: 48px; margin-bottom: 8px;">👨‍🏫</div>
-                        教师端
-                    </button>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 800px; margin: 0 auto 32px;">
+                <!-- 学生入口 -->
+                <div class="card card-hover" onclick="loginAsStudent()" style="cursor: pointer; text-align: center; padding: 32px;">
+                    <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #2196F3, #1565C0); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                        <span style="font-size: 48px;">🔍</span>
+                    </div>
+                    <h2 style="font-size: 28px; margin-bottom: 12px;">我是探秘者</h2>
+                    <p style="color: #666; margin-bottom: 20px;">拿起放大镜，开始我的观察日记</p>
+                    <div style="font-size: 48px; margin-bottom: 16px;">📱</div>
+                    <button class="btn btn-primary" style="width: 100%;">进入探秘</button>
+                </div>
+                
+                <!-- 教师入口 -->
+                <div class="card card-hover" onclick="loginAsTeacher()" style="cursor: pointer; text-align: center; padding: 32px;">
+                    <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #9C27B0, #6A1B9A); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                        <span style="font-size: 48px;">🛡️</span>
+                    </div>
+                    <h2 style="font-size: 28px; margin-bottom: 12px;">我是守护者</h2>
+                    <p style="color: #666; margin-bottom: 20px;">用心守护，见证每一个成长瞬间</p>
+                    <div style="font-size: 48px; margin-bottom: 16px;">👨‍🏫</div>
+                    <button class="btn btn-secondary" style="width: 100%;">进入管理</button>
+                </div>
+            </div>
+
+            <!-- 实时数据跑马灯 -->
+            <div style="text-align: center;">
+                <div class="animate-pulse-glow" style="display: inline-block; background: white; border-radius: 50px; padding: 16px 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <p style="font-size: 16px; color: #666;">
+                        🎉 全校已种植 <span id="totalPlants" style="font-weight: bold; color: #FF6347;">0</span> 棵番茄，
+                        累计长高 <span id="totalHeight" style="font-weight: bold; color: #4CAF50;">0</span> 厘米！
+                    </p>
                 </div>
             </div>
         </div>
@@ -794,29 +1349,382 @@
                 <div id="teacherPhotosList"></div>
             </div>
         </div>
+
+        <!-- ===== 新增：学生仪表盘页面 ===== -->
+        <div id="student-dashboard" class="page">
+            <button class="back-btn" onclick="showPage('landing')">
+                ← 返回首页
+            </button>
+            
+            <div class="card">
+                <div class="dashboard-header">
+                    <div class="user-profile">
+                        <div class="user-avatar-large" id="dashboardAvatar">👦</div>
+                        <div class="user-details">
+                            <h2 id="dashboardName">学生</h2>
+                            <p>等级 <span id="dashboardLevel">1</span> · 定植第 <span id="dashboardDays">0</span> 天</p>
+                        </div>
+                    </div>
+                    <div class="badge-list" id="dashboardBadges"></div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 24px;">
+                <!-- 左侧：番茄状态 -->
+                <div>
+                    <div class="card">
+                        <h3 style="font-size: 20px; margin-bottom: 16px;">🌱 我的番茄</h3>
+                        
+                        <!-- 生长阶段 -->
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-header">
+                                <span id="stageEmoji">🌱</span>
+                                <span id="stageName">幼苗期</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-bar-fill" id="stageProgress" style="width: 0%"></div>
+                            </div>
+                            <p style="text-align: right; font-size: 14px; color: #666; margin-top: 4px;">
+                                <span id="stagePercent">0</span>%
+                            </p>
+                        </div>
+
+                        <!-- 番茄动画 -->
+                        <div class="tomato-display">
+                            <div class="tomato-plant" id="tomatoPlant">🌱</div>
+                            <div style="margin-top: 16px; background: linear-gradient(180deg, #8B4513, #654321); height: 40px; border-radius: 8px 8px 0 0;"></div>
+                        </div>
+
+                        <!-- 快速数据 -->
+                        <div class="quick-stats">
+                            <div class="quick-stat">
+                                <div class="quick-stat-icon">📏</div>
+                                <div class="quick-stat-value" id="quickHeight">0</div>
+                                <div class="quick-stat-label">株高(cm)</div>
+                            </div>
+                            <div class="quick-stat">
+                                <div class="quick-stat-icon">🍃</div>
+                                <div class="quick-stat-value" id="quickLeaves">0</div>
+                                <div class="quick-stat-label">叶片</div>
+                            </div>
+                            <div class="quick-stat">
+                                <div class="quick-stat-icon">🌸</div>
+                                <div class="quick-stat-value" id="quickFlowers">0</div>
+                                <div class="quick-stat-label">花朵</div>
+                            </div>
+                            <div class="quick-stat">
+                                <div class="quick-stat-icon">🍅</div>
+                                <div class="quick-stat-value" id="quickFruits">0</div>
+                                <div class="quick-stat-label">果实</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧：任务和操作 -->
+                <div>
+                    <!-- 今日任务 -->
+                    <div class="task-card">
+                        <h3 style="font-size: 20px; margin-bottom: 16px;">📋 今日任务</h3>
+                        <div id="dailyTask"></div>
+                    </div>
+
+                    <!-- 快捷操作 -->
+                    <div class="card">
+                        <h3 style="font-size: 20px; margin-bottom: 16px;">快捷操作</h3>
+                        <div class="action-grid">
+                            <div class="action-card red" onclick="showPage('data-entry')">
+                                <div class="action-icon">📊</div>
+                                <div class="action-label">记录数据</div>
+                            </div>
+                            <div class="action-card green" onclick="showPage('visualization')">
+                                <div class="action-icon">📈</div>
+                                <div class="action-label">查看图表</div>
+                            </div>
+                            <div class="action-card blue" onclick="showPage('photo-capture')">
+                                <div class="action-icon">📸</div>
+                                <div class="action-label">拍照记录</div>
+                            </div>
+                            <div class="action-card purple" onclick="showPage('class-wall')">
+                                <div class="action-icon">🖼️</div>
+                                <div class="action-label">班级照片墙</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 成就徽章 -->
+                    <div class="card" style="margin-top: 24px;">
+                        <h3 style="font-size: 20px; margin-bottom: 16px;">🏆 我的成就</h3>
+                        <div id="achievementList" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 新增：数据录入页面 ===== -->
+        <div id="data-entry" class="page">
+            <button class="back-btn" onclick="showPage('student-dashboard')">
+                ← 返回控制台
+            </button>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 28px;">🔬 生长记录实验室</h2>
+                    <span style="font-size: 18px; color: #666;">定植第 <span id="entryDays" style="font-weight: bold; color: #FF6347;">0</span> 天</span>
+                </div>
+
+                <form id="dataEntryForm" onsubmit="submitDataEntry(event)">
+                    <!-- 日期选择 -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="font-size: 18px; font-weight: bold; display: block; margin-bottom: 8px;">📅 记录日期</label>
+                        <input type="date" id="entryDate" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 12px; font-size: 16px;">
+                    </div>
+
+                    <!-- 株高测量 -->
+                    <div class="data-entry-section">
+                        <label style="font-size: 18px; font-weight: bold; display: block; margin-bottom: 16px;">📏 株高测量</label>
+                        <div class="height-slider-container">
+                            <div class="ruler-marks">
+                                <span>100cm</span>
+                                <span>80cm</span>
+                                <span>60cm</span>
+                                <span>40cm</span>
+                                <span>20cm</span>
+                                <span>0cm</span>
+                            </div>
+                            <input type="range" id="heightSlider" min="0" max="100" value="20" 
+                                   style="writing-mode: bt-lr; -webkit-appearance: slider-vertical; appearance: slider-vertical; width: 40px; height: 300px;"
+                                   oninput="updateHeightDisplay()">
+                            <div style="font-size: 60px; transition: all 0.3s;" id="plantVisual">🌱</div>
+                            <div class="height-display">
+                                <div class="value" id="heightValue">20</div>
+                                <div class="unit">厘米</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 叶片、花、果计数 -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+                        <div class="card" style="text-align: center;">
+                            <div style="font-size: 36px; margin-bottom: 8px;">🍃</div>
+                            <div style="font-weight: bold; margin-bottom: 12px;">叶片数</div>
+                            <div class="stepper-control">
+                                <button type="button" class="stepper-btn minus" onclick="adjustValue('leaves', -1)">−</button>
+                                <span class="stepper-value" id="leavesValue">4</span>
+                                <button type="button" class="stepper-btn plus" onclick="adjustValue('leaves', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="card" style="text-align: center;">
+                            <div style="font-size: 36px; margin-bottom: 8px;">🌸</div>
+                            <div style="font-weight: bold; margin-bottom: 12px;">花朵数</div>
+                            <div class="stepper-control">
+                                <button type="button" class="stepper-btn minus" onclick="adjustValue('flowers', -1)">−</button>
+                                <span class="stepper-value" id="flowersValue">0</span>
+                                <button type="button" class="stepper-btn plus" onclick="adjustValue('flowers', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="card" style="text-align: center;">
+                            <div style="font-size: 36px; margin-bottom: 8px;">🍅</div>
+                            <div style="font-weight: bold; margin-bottom: 12px;">果实数</div>
+                            <div class="stepper-control">
+                                <button type="button" class="stepper-btn minus" onclick="adjustValue('fruits', -1)">−</button>
+                                <span class="stepper-value" id="fruitsValue">0</span>
+                                <button type="button" class="stepper-btn plus" onclick="adjustValue('fruits', 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 拍照记录 -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="font-size: 18px; font-weight: bold; display: block; margin-bottom: 8px;">📸 拍照记录</label>
+                        <input type="file" accept="image/*" id="entryPhotoInput" style="display: none;" onchange="handleEntryPhoto(event)">
+                        <div onclick="document.getElementById('entryPhotoInput').click()" 
+                             style="border: 2px dashed #ddd; border-radius: 16px; padding: 32px; text-align: center; cursor: pointer; background: linear-gradient(135deg, #F3E8FF, #E9D5FF);">
+                            <div id="entryPhotoPreview">
+                                <div style="font-size: 48px; margin-bottom: 8px;">📷</div>
+                                <p style="color: #666;">点击上传照片</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 观察笔记 -->
+                    <div style="margin-bottom: 24px;">
+                        <label style="font-size: 18px; font-weight: bold; display: block; margin-bottom: 8px;">📝 观察笔记</label>
+                        <textarea id="entryNotes" rows="4" placeholder="今天番茄有什么变化？我做了什么..." 
+                                  style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 12px; font-size: 16px; resize: none;"></textarea>
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <button type="button" class="btn btn-outline" onclick="showPage('student-dashboard')">取消</button>
+                        <button type="submit" class="btn btn-primary">💾 保存记录</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== 新增：数据可视化页面 ===== -->
+        <div id="visualization" class="page">
+            <button class="back-btn" onclick="showPage('student-dashboard')">
+                ← 返回控制台
+            </button>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 28px;">📈 数据可视化大厅</h2>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="showClassAvg" onchange="toggleClassAverage()" style="width: 20px; height: 20px;">
+                        <span>显示全班平均</span>
+                    </label>
+                </div>
+
+                <!-- 生长曲线图 -->
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 16px;">📈 株高生长曲线</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="growthChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 多指标统计 -->
+                <div class="stats-grid">
+                    <div class="stat-card green">
+                        <div class="stat-icon">🍃</div>
+                        <div class="stat-value" id="vizLeaves">0</div>
+                        <div class="stat-label">叶片总数</div>
+                    </div>
+                    <div class="stat-card pink">
+                        <div class="stat-icon">🌸</div>
+                        <div class="stat-value" id="vizFlowers">0</div>
+                        <div class="stat-label">花朵总数</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-icon">🍅</div>
+                        <div class="stat-value" id="vizFruits">0</div>
+                        <div class="stat-label">果实总数</div>
+                    </div>
+                </div>
+
+                <!-- 智能洞察 -->
+                <div style="margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 16px;">💡 数据洞察</h3>
+                    <div id="insightsList"></div>
+                </div>
+
+                <!-- 历史记录表格 -->
+                <div>
+                    <h3 style="margin-bottom: 16px;">📋 历史记录</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>日期</th>
+                                    <th>天数</th>
+                                    <th>株高</th>
+                                    <th>叶片</th>
+                                    <th>花朵</th>
+                                    <th>果实</th>
+                                    <th>增长</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 新增：教师全景监控页面 ===== -->
+        <div id="teacher-monitor" class="page">
+            <button class="back-btn" onclick="showPage('landing')">
+                ← 返回首页
+            </button>
+
+            <div style="margin-bottom: 24px;">
+                <h1 style="font-size: 32px; margin-bottom: 8px;">🎯 全景监控舱</h1>
+                <p style="color: #666;">班级番茄种植全景管理</p>
+            </div>
+
+            <!-- 数据概览 -->
+            <div class="monitor-grid">
+                <div class="stat-card blue">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="monitorTotal">0</div>
+                    <div class="stat-label">学生总数</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value" id="monitorActive">0</div>
+                    <div class="stat-label">正常记录</div>
+                </div>
+                <div class="stat-card yellow">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-value" id="monitorWarning">0</div>
+                    <div class="stat-label">待提醒</div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-icon">🚨</div>
+                    <div class="stat-value" id="monitorError">0</div>
+                    <div class="stat-label">数据异常</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-icon">📏</div>
+                    <div class="stat-value" id="monitorAvgHeight">0</div>
+                    <div class="stat-label">平均株高(cm)</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                <!-- 学生列表 -->
+                <div class="card">
+                    <h2 style="font-size: 24px; margin-bottom: 24px;">学生列表</h2>
+                    <div id="monitorStudentList"></div>
+                </div>
+
+                <!-- 学生详情面板 -->
+                <div class="student-detail-panel" id="studentDetailPanel">
+                    <div id="studentDetailContent" style="text-align: center; padding: 48px; color: #999;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">👈</div>
+                        <p>选择一个学生查看详情</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 底部导航 -->
     <div class="bottom-nav" id="bottomNav" style="display: none;">
-        <div class="nav-item active" onclick="showPage('my-photos')">
-            <span class="nav-icon">🌱</span>
-            <span class="nav-label">我的番茄</span>
+        <div class="nav-item active" onclick="showPage('student-dashboard')" data-page="student-dashboard">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">首页</span>
         </div>
-        <div class="nav-item" onclick="showPage('photo-capture')">
+        <div class="nav-item" onclick="showPage('data-entry')" data-page="data-entry">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">记录</span>
+        </div>
+        <div class="nav-item" onclick="showPage('visualization')" data-page="visualization">
+            <span class="nav-icon">📈</span>
+            <span class="nav-label">图表</span>
+        </div>
+        <div class="nav-item" onclick="showPage('photo-capture')" data-page="photo-capture">
             <span class="nav-icon">📸</span>
             <span class="nav-label">拍照</span>
         </div>
-        <div class="nav-item" onclick="showPage('timeline')">
-            <span class="nav-icon">📅</span>
-            <span class="nav-label">时间轴</span>
-        </div>
-        <div class="nav-item" onclick="showPage('class-wall')">
+        <div class="nav-item" onclick="showPage('class-wall')" data-page="class-wall">
             <span class="nav-icon">🖼️</span>
             <span class="nav-label">照片墙</span>
         </div>
-        <div class="nav-item" onclick="showPage('ebook')">
-            <span class="nav-icon">📖</span>
-            <span class="nav-label">电子书</span>
+    </div>
+
+    <!-- 预测弹窗 -->
+    <div class="modal-overlay" id="predictionModal">
+        <div class="modal-content">
+            <h3 class="modal-title">🤔 探究性提问</h3>
+            <p style="font-size: 18px;">你预测今天番茄长高了吗？</p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="answerPrediction(true)">👍 是的，长高了</button>
+                <button class="btn btn-outline" onclick="answerPrediction(false)">👎 没有变化</button>
+            </div>
         </div>
     </div>
 
@@ -829,28 +1737,47 @@
     </div>
 
     <script>
-        // 数据模型
+        // 数据模型 - 整合版
         let appData = {
             currentUser: null,
             photos: [],
             comments: [],
             students: [
-                { id: 1, name: '小明', avatar: '👦' },
-                { id: 2, name: '小红', avatar: '👧' },
-                { id: 3, name: '小刚', avatar: '👨' },
-                { id: 4, name: '小美', avatar: '👩' },
+                { id: 1, name: '小明', avatar: '👦', level: 5, plantingDate: '2024-01-01', records: [], badges: ['全勤记录奖', '初次开花纪念'] },
+                { id: 2, name: '小红', avatar: '👧', level: 4, plantingDate: '2024-01-01', records: [], badges: ['全勤记录奖'] },
+                { id: 3, name: '小刚', avatar: '👨', level: 3, plantingDate: '2024-01-05', records: [], badges: [] },
+                { id: 4, name: '小美', avatar: '👩', level: 4, plantingDate: '2024-01-03', records: [], badges: ['观察达人'] },
             ],
-            currentPhoto: null
+            currentPhoto: null,
+            entryPhoto: null,
+            prediction: null,
+            selectedStudentId: null,
+            growthChart: null
         };
 
         // 初始化
         function init() {
             loadFromLocalStorage();
             generateSampleData();
+            updateLandingStats();
+        }
+
+        // 更新首页统计
+        function updateLandingStats() {
+            const totalPlants = appData.students.length;
+            let totalHeight = 0;
+            appData.students.forEach(s => {
+                if (s.records && s.records.length > 0) {
+                    totalHeight += s.records[s.records.length - 1].height || 0;
+                }
+            });
+            document.getElementById('totalPlants').textContent = totalPlants;
+            document.getElementById('totalHeight').textContent = totalHeight;
         }
 
         // 生成示例数据
         function generateSampleData() {
+            // 生成照片数据
             if (appData.photos.length === 0) {
                 const now = Date.now();
                 for (let i = 0; i < 6; i++) {
@@ -866,6 +1793,37 @@
                     });
                 }
             }
+
+            // 生成生长记录数据
+            appData.students.forEach(student => {
+                if (!student.records || student.records.length === 0) {
+                    student.records = generateSampleRecords(student.plantingDate, 15);
+                }
+            });
+            saveToLocalStorage();
+        }
+
+        // 生成示例记录
+        function generateSampleRecords(startDate, count) {
+            const records = [];
+            const start = new Date(startDate);
+            
+            for (let i = 0; i < count; i++) {
+                const date = new Date(start);
+                date.setDate(date.getDate() + i);
+                
+                records.push({
+                    date: date.toISOString().split('T')[0],
+                    height: Math.floor(5 + i * 1.5 + Math.random() * 2),
+                    leaves: Math.floor(2 + i * 0.5),
+                    flowers: i > 10 ? Math.floor(Math.random() * 3) : 0,
+                    fruits: i > 12 ? Math.floor(Math.random() * 2) : 0,
+                    photo: null,
+                    notes: ''
+                });
+            }
+            
+            return records;
         }
 
         // LocalStorage
@@ -890,7 +1848,7 @@
                     ...appData.students[studentId - 1]
                 };
                 document.getElementById('bottomNav').style.display = 'flex';
-                showPage('my-photos');
+                showPage('student-dashboard');
             }
         }
 
@@ -901,8 +1859,8 @@
                 name: '王老师',
                 avatar: '👨‍🏫'
             };
-            showPage('teacher-panel');
-            loadTeacherPanel();
+            document.getElementById('bottomNav').style.display = 'none';
+            showPage('teacher-monitor');
         }
 
         // 页面导航
@@ -910,20 +1868,548 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            event?.target?.closest('.nav-item')?.classList.add('active');
+            // 更新底部导航高亮
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.page === pageId) {
+                    item.classList.add('active');
+                }
+            });
 
             // 加载对应页面内容
+            if (pageId === 'landing') updateLandingStats();
+            if (pageId === 'student-dashboard') loadStudentDashboard();
+            if (pageId === 'data-entry') loadDataEntry();
+            if (pageId === 'visualization') loadVisualization();
             if (pageId === 'my-photos') loadMyPhotos();
             if (pageId === 'class-wall') loadClassWall();
             if (pageId === 'discussion') loadDiscussion();
             if (pageId === 'timeline') loadTimeline();
+            if (pageId === 'teacher-panel') loadTeacherPanel();
+            if (pageId === 'teacher-monitor') loadTeacherMonitor();
             if (pageId === 'ebook') {
                 document.getElementById('ebookPreview').innerHTML = '';
                 document.getElementById('downloadEbookBtn').style.display = 'none';
             }
             
             window.scrollTo(0, 0);
+        }
+
+        // ===== 工具函数 =====
+        function getDaysSincePlanting(plantingDate) {
+            const today = new Date();
+            const planting = new Date(plantingDate);
+            const diffTime = Math.abs(today - planting);
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function getGrowthStage(days) {
+            if (days < 7) return { name: '幼苗期', emoji: '🌱', progress: (days / 7) * 100 };
+            if (days < 30) return { name: '成长期', emoji: '🌿', progress: ((days - 7) / 23) * 100 };
+            if (days < 50) return { name: '开花期', emoji: '🌸', progress: ((days - 30) / 20) * 100 };
+            return { name: '结果期', emoji: '🍅', progress: Math.min(((days - 50) / 30) * 100, 100) };
+        }
+
+        function getCurrentStudent() {
+            return appData.students.find(s => s.id === appData.currentUser?.id);
+        }
+
+        // ===== 学生仪表盘 =====
+        function loadStudentDashboard() {
+            const student = getCurrentStudent();
+            if (!student) return;
+
+            const days = getDaysSincePlanting(student.plantingDate);
+            const stage = getGrowthStage(days);
+            const lastRecord = student.records[student.records.length - 1] || {};
+
+            // 更新头部信息
+            document.getElementById('dashboardAvatar').textContent = student.avatar;
+            document.getElementById('dashboardName').textContent = student.name;
+            document.getElementById('dashboardLevel').textContent = student.level;
+            document.getElementById('dashboardDays').textContent = days;
+
+            // 更新徽章
+            const badgesHtml = (student.badges || []).map(b => 
+                `<span class="badge-item">🏆 ${b}</span>`
+            ).join('');
+            document.getElementById('dashboardBadges').innerHTML = badgesHtml;
+
+            // 更新生长阶段
+            document.getElementById('stageEmoji').textContent = stage.emoji;
+            document.getElementById('stageName').textContent = stage.name;
+            document.getElementById('stageProgress').style.width = stage.progress + '%';
+            document.getElementById('stagePercent').textContent = Math.round(stage.progress);
+
+            // 更新番茄植株显示
+            const plantEmoji = days < 7 ? '🌱' : days < 30 ? '🌿' : days < 50 ? '🌸' : '🍅';
+            document.getElementById('tomatoPlant').textContent = plantEmoji;
+
+            // 更新快速数据
+            document.getElementById('quickHeight').textContent = lastRecord.height || 0;
+            document.getElementById('quickLeaves').textContent = lastRecord.leaves || 0;
+            document.getElementById('quickFlowers').textContent = lastRecord.flowers || 0;
+            document.getElementById('quickFruits').textContent = lastRecord.fruits || 0;
+
+            // 更新今日任务
+            const today = new Date().toISOString().split('T')[0];
+            const hasRecordToday = student.records.some(r => r.date === today);
+            
+            const taskHtml = hasRecordToday ? `
+                <div class="task-completed">
+                    <p style="font-size: 18px; margin-bottom: 8px;">✅ 今日任务已完成！</p>
+                    <p style="color: #666;">继续保持，明天见！</p>
+                </div>
+            ` : `
+                <div class="task-pending">
+                    <p style="font-size: 18px; margin-bottom: 12px;">🌱 任务：去看看你的番茄怎么样了？</p>
+                    <p style="color: #666; margin-bottom: 16px;">今天还没有记录数据哦！</p>
+                    <button class="btn btn-primary" onclick="showPage('data-entry')">开始记录</button>
+                </div>
+            `;
+            document.getElementById('dailyTask').innerHTML = taskHtml;
+
+            // 更新成就列表
+            const achievements = (student.badges || []).map(b => `
+                <div style="text-align: center;">
+                    <div style="width: 60px; height: 60px; background: #FEF3C7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 8px;">🏆</div>
+                    <p style="font-size: 12px; color: #666;">${b}</p>
+                </div>
+            `).join('');
+            
+            const lockedAchievement = `
+                <div style="text-align: center; opacity: 0.5;">
+                    <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 8px;">❓</div>
+                    <p style="font-size: 12px; color: #999;">待解锁</p>
+                </div>
+            `;
+            document.getElementById('achievementList').innerHTML = achievements + lockedAchievement;
+        }
+
+        // ===== 数据录入 =====
+        function loadDataEntry() {
+            const student = getCurrentStudent();
+            if (!student) return;
+
+            const days = getDaysSincePlanting(student.plantingDate);
+            document.getElementById('entryDays').textContent = days;
+            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('entryDate').max = new Date().toISOString().split('T')[0];
+
+            // 预填充上次数据
+            const lastRecord = student.records[student.records.length - 1];
+            if (lastRecord) {
+                document.getElementById('heightSlider').value = lastRecord.height + 1;
+                document.getElementById('heightValue').textContent = lastRecord.height + 1;
+                document.getElementById('leavesValue').textContent = lastRecord.leaves;
+                document.getElementById('flowersValue').textContent = lastRecord.flowers;
+                document.getElementById('fruitsValue').textContent = lastRecord.fruits;
+            }
+
+            // 重置照片预览
+            document.getElementById('entryPhotoPreview').innerHTML = `
+                <div style="font-size: 48px; margin-bottom: 8px;">📷</div>
+                <p style="color: #666;">点击上传照片</p>
+            `;
+            appData.entryPhoto = null;
+
+            // 显示预测弹窗
+            document.getElementById('predictionModal').classList.add('active');
+        }
+
+        function updateHeightDisplay() {
+            const value = document.getElementById('heightSlider').value;
+            document.getElementById('heightValue').textContent = value;
+            
+            // 更新植物图标
+            const plantVisual = document.getElementById('plantVisual');
+            if (value < 20) plantVisual.textContent = '🌱';
+            else if (value < 40) plantVisual.textContent = '🌿';
+            else if (value < 60) plantVisual.textContent = '🌸';
+            else plantVisual.textContent = '🍅';
+        }
+
+        function adjustValue(field, delta) {
+            const elem = document.getElementById(field + 'Value');
+            const current = parseInt(elem.textContent);
+            elem.textContent = Math.max(0, current + delta);
+        }
+
+        function handleEntryPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                appData.entryPhoto = e.target.result;
+                document.getElementById('entryPhotoPreview').innerHTML = `
+                    <img src="${e.target.result}" style="max-width: 100%; max-height: 200px; border-radius: 12px;">
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function answerPrediction(willGrow) {
+            appData.prediction = willGrow;
+            document.getElementById('predictionModal').classList.remove('active');
+        }
+
+        function submitDataEntry(e) {
+            e.preventDefault();
+            
+            const student = getCurrentStudent();
+            if (!student) return;
+
+            const height = parseInt(document.getElementById('heightSlider').value);
+            const lastRecord = student.records[student.records.length - 1];
+
+            // 验证数据
+            if (lastRecord && height < lastRecord.height - 5) {
+                alert('⚠️ 数据可能有误：番茄不太可能一夜之间变矮哦！');
+                return;
+            }
+
+            const newRecord = {
+                date: document.getElementById('entryDate').value,
+                height: height,
+                leaves: parseInt(document.getElementById('leavesValue').textContent),
+                flowers: parseInt(document.getElementById('flowersValue').textContent),
+                fruits: parseInt(document.getElementById('fruitsValue').textContent),
+                photo: appData.entryPhoto,
+                notes: document.getElementById('entryNotes').value
+            };
+
+            student.records.push(newRecord);
+            saveToLocalStorage();
+
+            // 显示预测反馈
+            if (appData.prediction !== null && lastRecord) {
+                const actualGrowth = height - lastRecord.height;
+                const correct = (appData.prediction && actualGrowth > 0) || (!appData.prediction && actualGrowth <= 0);
+                
+                setTimeout(() => {
+                    alert(correct 
+                        ? `🎉 哇！比昨天长了 ${actualGrowth}cm，你的预测是对的！`
+                        : `🤔 比昨天长了 ${actualGrowth}cm，和预测不太一样呢。下次再观察看看！`
+                    );
+                }, 300);
+            }
+
+            appData.prediction = null;
+            alert('✅ 记录保存成功！');
+            showPage('student-dashboard');
+        }
+
+        // ===== 数据可视化 =====
+        function loadVisualization() {
+            const student = getCurrentStudent();
+            if (!student || !student.records.length) return;
+
+            const records = student.records;
+            const lastRecord = records[records.length - 1];
+
+            // 更新统计卡片
+            document.getElementById('vizLeaves').textContent = lastRecord.leaves || 0;
+            document.getElementById('vizFlowers').textContent = lastRecord.flowers || 0;
+            document.getElementById('vizFruits').textContent = lastRecord.fruits || 0;
+
+            // 绘制图表
+            drawGrowthChart(records);
+
+            // 生成洞察
+            generateInsights(records);
+
+            // 填充历史表格
+            fillHistoryTable(records);
+        }
+
+        function drawGrowthChart(records) {
+            const ctx = document.getElementById('growthChart').getContext('2d');
+            
+            // 销毁旧图表
+            if (appData.growthChart) {
+                appData.growthChart.destroy();
+            }
+
+            const labels = records.map((r, i) => `第${i + 1}天`);
+            const heights = records.map(r => r.height);
+
+            const datasets = [{
+                label: '我的番茄',
+                data: heights,
+                borderColor: '#FF6347',
+                backgroundColor: 'rgba(255, 99, 71, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3,
+                pointRadius: 6,
+                pointBackgroundColor: '#FF6347'
+            }];
+
+            // 添加全班平均线
+            if (document.getElementById('showClassAvg').checked) {
+                const avgHeights = records.map((_, i) => {
+                    let sum = 0, count = 0;
+                    appData.students.forEach(s => {
+                        if (s.records[i]) {
+                            sum += s.records[i].height;
+                            count++;
+                        }
+                    });
+                    return count > 0 ? sum / count : 0;
+                });
+
+                datasets.push({
+                    label: '全班平均',
+                    data: avgHeights,
+                    borderColor: '#999',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#999'
+                });
+            }
+
+            appData.growthChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '高度 (cm)' }
+                        },
+                        x: {
+                            title: { display: true, text: '天数' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function toggleClassAverage() {
+            const student = getCurrentStudent();
+            if (student && student.records.length) {
+                drawGrowthChart(student.records);
+            }
+        }
+
+        function generateInsights(records) {
+            const insights = [];
+            
+            if (records.length < 2) {
+                document.getElementById('insightsList').innerHTML = '<p style="color: #666;">记录更多数据后将显示智能洞察</p>';
+                return;
+            }
+
+            // 找出生长最快的时期
+            let maxGrowth = 0, maxPeriod = { start: 0, end: 0 };
+            for (let i = 1; i < records.length; i++) {
+                const growth = records[i].height - records[i - 1].height;
+                if (growth > maxGrowth) {
+                    maxGrowth = growth;
+                    maxPeriod = { start: i, end: i + 1 };
+                }
+            }
+            if (maxGrowth > 0) {
+                insights.push({
+                    emoji: '📈',
+                    text: `你的番茄在第${maxPeriod.start}天到第${maxPeriod.end}天生长速度最快，长了${maxGrowth}cm！`
+                });
+            }
+
+            // 开花时间
+            const firstFlower = records.findIndex(r => r.flowers > 0);
+            if (firstFlower !== -1) {
+                insights.push({
+                    emoji: '🎉',
+                    text: `恭喜！你的番茄在第${firstFlower + 1}天开出了第一朵花 🌸`
+                });
+            }
+
+            // 结果时间
+            const firstFruit = records.findIndex(r => r.fruits > 0);
+            if (firstFruit !== -1) {
+                insights.push({
+                    emoji: '🎊',
+                    text: `太棒了！第${firstFruit + 1}天出现了第一颗番茄 🍅`
+                });
+            }
+
+            // 平均生长速度
+            const totalGrowth = records[records.length - 1].height - records[0].height;
+            const avgGrowth = (totalGrowth / records.length).toFixed(2);
+            insights.push({
+                emoji: '📊',
+                text: `你的番茄平均每天长高${avgGrowth}cm`
+            });
+
+            const html = insights.map(i => `
+                <div class="insight-card">
+                    <div class="insight-emoji">${i.emoji}</div>
+                    <div class="insight-text">${i.text}</div>
+                </div>
+            `).join('');
+            document.getElementById('insightsList').innerHTML = html;
+        }
+
+        function fillHistoryTable(records) {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = records.map((r, i) => {
+                const growth = i > 0 ? r.height - records[i - 1].height : 0;
+                const growthClass = growth > 0 ? 'growth-positive' : growth < 0 ? 'growth-negative' : '';
+                const growthText = growth > 0 ? `+${growth}cm` : growth < 0 ? `${growth}cm` : '-';
+                
+                return `
+                    <tr>
+                        <td>${r.date}</td>
+                        <td>第${i + 1}天</td>
+                        <td><strong>${r.height}cm</strong></td>
+                        <td>${r.leaves}</td>
+                        <td>${r.flowers}</td>
+                        <td>${r.fruits}</td>
+                        <td class="${growthClass}">${growthText}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ===== 教师全景监控 =====
+        function loadTeacherMonitor() {
+            const students = appData.students.map(student => {
+                const lastRecord = student.records[student.records.length - 1];
+                const daysSinceLastUpdate = lastRecord 
+                    ? Math.ceil((new Date() - new Date(lastRecord.date)) / (1000 * 60 * 60 * 24))
+                    : 999;
+
+                // 检查数据异常
+                let hasError = false;
+                if (student.records.length >= 2) {
+                    const lastTwo = student.records.slice(-2);
+                    if (lastTwo[1].height < lastTwo[0].height - 5) {
+                        hasError = true;
+                    }
+                }
+
+                let status = 'normal';
+                if (hasError) status = 'error';
+                else if (daysSinceLastUpdate > 3) status = 'warning';
+
+                return { ...student, status, daysSinceLastUpdate, lastRecord };
+            });
+
+            // 更新统计
+            document.getElementById('monitorTotal').textContent = students.length;
+            document.getElementById('monitorActive').textContent = students.filter(s => s.status === 'normal').length;
+            document.getElementById('monitorWarning').textContent = students.filter(s => s.status === 'warning').length;
+            document.getElementById('monitorError').textContent = students.filter(s => s.status === 'error').length;
+            
+            const avgHeight = students.reduce((sum, s) => sum + (s.lastRecord?.height || 0), 0) / students.length;
+            document.getElementById('monitorAvgHeight').textContent = avgHeight.toFixed(1);
+
+            // 渲染学生列表
+            const listHtml = students.map(s => {
+                const statusText = s.status === 'error' ? '数据异常' : s.status === 'warning' ? `${s.daysSinceLastUpdate}天未更新` : '正常记录';
+                return `
+                    <div class="student-list-item ${appData.selectedStudentId === s.id ? 'selected' : ''}" onclick="selectStudent(${s.id})">
+                        <div class="student-info">
+                            <div class="status-indicator ${s.status}"></div>
+                            <span style="font-size: 24px;">${s.avatar}</span>
+                            <div>
+                                <div style="font-weight: bold;">${s.name}</div>
+                                <div style="font-size: 12px; color: #666;">${statusText}</div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: bold;">${s.lastRecord?.height || 0}cm</div>
+                            <div style="font-size: 12px; color: #666;">${s.records.length}条记录</div>
+                        </div>
+                        ${s.status === 'warning' ? `<button class="btn btn-small" style="background: #FEF3C7; margin-left: 12px;" onclick="event.stopPropagation(); remindStudent(${s.id})">🔔</button>` : ''}
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('monitorStudentList').innerHTML = listHtml;
+        }
+
+        function selectStudent(studentId) {
+            appData.selectedStudentId = studentId;
+            loadTeacherMonitor();
+
+            const student = appData.students.find(s => s.id === studentId);
+            if (!student) return;
+
+            const days = getDaysSincePlanting(student.plantingDate);
+            const lastRecord = student.records[student.records.length - 1] || {};
+
+            const html = `
+                <h2 style="font-size: 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 32px;">${student.avatar}</span>
+                    ${student.name}的档案
+                </h2>
+
+                <div class="detail-section">
+                    <div class="detail-row"><span>定植日期：</span><strong>${student.plantingDate}</strong></div>
+                    <div class="detail-row"><span>种植天数：</span><strong>${days}天</strong></div>
+                    <div class="detail-row"><span>等级：</span><strong>Lv.${student.level}</strong></div>
+                    <div class="detail-row"><span>记录次数：</span><strong>${student.records.length}次</strong></div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #D1FAE5, #A7F3D0); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 12px;">当前数据</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                        <div style="text-align: center;"><div style="font-size: 24px;">📏</div><strong>${lastRecord.height || 0}cm</strong><div style="font-size: 12px; color: #666;">株高</div></div>
+                        <div style="text-align: center;"><div style="font-size: 24px;">🍃</div><strong>${lastRecord.leaves || 0}</strong><div style="font-size: 12px; color: #666;">叶片</div></div>
+                        <div style="text-align: center;"><div style="font-size: 24px;">🌸</div><strong>${lastRecord.flowers || 0}</strong><div style="font-size: 12px; color: #666;">花朵</div></div>
+                        <div style="text-align: center;"><div style="font-size: 24px;">🍅</div><strong>${lastRecord.fruits || 0}</strong><div style="font-size: 12px; color: #666;">果实</div></div>
+                    </div>
+                </div>
+
+                ${student.badges && student.badges.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="margin-bottom: 12px;">获得的勋章</h3>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            ${student.badges.map(b => `<span class="badge-item">🏆 ${b}</span>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <button class="btn btn-secondary" style="width: 100%; margin-bottom: 12px;" onclick="exportStudentReport(${student.id})">
+                    📥 导出电子档案袋
+                </button>
+            `;
+            document.getElementById('studentDetailContent').innerHTML = html;
+        }
+
+        function remindStudent(studentId) {
+            const student = appData.students.find(s => s.id === studentId);
+            alert(`✉️ 已向${student.name}发送提醒！\n\n"嗨${student.name}，记得给你的番茄记录数据哦！"`);
+        }
+
+        function exportStudentReport(studentId) {
+            const student = appData.students.find(s => s.id === studentId);
+            const report = {
+                studentName: student.name,
+                plantingDate: student.plantingDate,
+                totalDays: getDaysSincePlanting(student.plantingDate),
+                records: student.records,
+                badges: student.badges
+            };
+            
+            const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${student.name}_番茄观察日记_报告.json`;
+            a.click();
+            
+            alert(`📄 ${student.name}的电子档案袋已生成！`);
         }
 
         // 处理照片选择
@@ -1512,74 +2998,61 @@
             `;
 
             // 显示预览
-            document   文档.getElementById('ebookPreview').innerHTML = `
+            document.getElementById('ebookPreview').innerHTML = `
                 <div class="ebook-preview">
                     <div class="ebook-cover">
                         <h1 style="font-size: 36px; margin-bottom: 16px;">🍅 我的番茄成长电子书</h1>
-                        <p style="font-size: 20px;">${student   学生.name} 的自然观察笔记</p>
-                        <p style="margin-top: 16px; opacity: 0.9;">共 <p style="margin-top: 16px; opacity: 0.9;">共${sortedPhotos.length   长度} 天的观察记录</p>
+                        <p style="font-size: 20px;">${student.name} 的自然观察笔记</p>
+                        <p style="margin-top: 16px; opacity: 0.9;">共 ${sortedPhotos.length} 天的观察记录</p>
                     </div>
                     <div style="text-align: center; padding: 24px; background: #E0F2FE; border-radius: 12px;">
-                        <p style="font-size: 18px; color: #0369a1; margin-bottom: 12px;">✅ 电子书已生成！</p>< p style=" font-size: 18px; color: #0369a1; margin-bottom: 12px; " > The e-book has been generated! < /p>
+                        <p style="font-size: 18px; color: #0369a1; margin-bottom: 12px;">✅ 电子书已生成！</p>
                         <p style="color: #666;">点击上方“下载电子书”按钮保存为HTML文件</p>
                     </div>
                 </div>
             `;
             
-            document   文档.getElementById('downloadEbookBtn').style   风格.display   显示 = 'inline-block'   “inline-block”； 
+            document.getElementById('downloadEbookBtn').style.display = 'inline-block'； 
 
 这段 JavaScript 代码的作用是将 id 为 "downloadEbookBtn" 的元素的显示样式设置为 "document.getElementById('downloadEbookBtn').style.display = 'inline-block';
-            alert   警报('✅ 电子书生成成功！点击下载按钮保存。');
+            alert('✅ 电子书生成成功！点击下载按钮保存。');
         }
 
         // 下载电子书
-        function   函数 downloadEbook() {  函数 downloadEbook() {function   函数 downloadEbook() {
-            if   如果 (!ebookHTML) {
-                alert   警报('请先生成电子书！');
-                   返回;return   返回;
+        function downloadEbook() {  函数 downloadEbook() {function downloadEbook() {
+            if (!ebookHTML) {
+                alert('请先生成电子书！');
+                return;
             }
 
-            const   常量 student = appData.students   学生.find   找到(s   年代 => s   年代.id === appData.currentUser.id)；
-const student = appData.students 中查找 s，使得 s.id 等于 appData.currentUser.id；const student = appData.students   学生.find   找到(s   年代 => s   年代.id === appData.currentUser.id);
-            const   常量 blob = new   新 Blob([ebookHTML], { type   类型: 'text/html;charset=utf-8'“text/html;charset=utf-8” })； 
-
-译文：const blob = new Blob([ebookHTML], { type: 'text/html;charset=utf-8' })；const blob = new   新 Blob([ebookHTML], { type   类型: 'text/html;charset=utf-8'“text/html;charset=utf-8” });
-            const   常量 url = URL.createObjectURL(blob   团)； 
-
-译文：const url = URL.createObjectURL(blob)； （此句为 JavaScript const url = URL.createObjectURL(blob   团);
-            const   常量 a = document   文档.createElement('a'   “一个”)； 
-
-// 直接翻译为中文：
-const a = 文档.createElement('a')；
-
-const a   一个 = document   文档.createElement('a'   “一个”);
-               A.href = url；a.href = url;
-            a   一个.download   下载 = `${student   学生.name}'s Tomato Growth E-book_${new   新 Date().toLocaleDateString('zh-CN')}.html`;a   一个.download = `${student   学生.name}的番茄成长电子书_${new   新 Date().toLocaleDateString('zh-CN')}.html`;
-            a   一个.click();
-            URL.revokeObjectURL(url)； 的译文为：URL.revokeObjectURL(url)； （此句为 JavaScriptURL.revokeObjectURL(url);
+            const student = appData.students.find(s => s.id === appData.currentUser.id);
+            const blob = new Blob([ebookHTML], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${student.name}的番茄成长电子书_${new Date().toLocaleDateString('zh-CN')}.html`;
+            a.click();
+            URL.revokeObjectURL(url);
             
-            alert   警报('✅ 电子书已下载！双击打开HTML文件即可查看。');
+            alert('✅ 电子书已下载！双击打开HTML文件即可查看。');
         }
 
         // 工具函数
-        function   函数 formatTime(timestamp) {
-  // 获取当前时间
-  var date = new Date(timestamp)；var date = new Date(时间戳
-  //function formatTime(timestamp) {
-            const   常量 date = new   新 Date(时间戳const date = new   新 Date(timestamp   时间戳);
-            const   常量 now = new Date();  // 当前日期和时间的 Date 对象const now = new Date();
-            const   常量 差值 = 当前时间 - 日期const diff = now   现在 - date   日期;
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
             
-            如果（差值 < 60000）则返回“刚刚”；if (diff < 60000) return   返回 '刚刚';
-            如果（差值 < 3600000）则返回 Math.floor（差值 / 60000） + ' 分钟前'；if (diff < 3600000) return   返回 Math   数学.floor   地板上(diff / 60000) + '分钟前';
-            如果（差值 < 86400000）则返回 Math.floor（差值 / 3600000） + '小时前'；if (diff < 86400000) return   返回 Math   数学.floor   地板上(diff / 3600000) + '小时前';
-            如果（差值 < 604800000）则返回 Math.floor（差值 / 86400000） + '天前'；if (diff < 604800000) return   返回 Math   数学.floor   地板上(diff / 86400000) + '天前';
+            if (diff < 60000) return '刚刚';
+            if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前';
+            if (diff < 604800000) return Math.floor(diff / 86400000) + '天前';
             
-            返回 date 对象的本地日期字符串（使用简体中文）。return date   日期.toLocaleDateString('zh-CN'   “应用”);
+            return date.toLocaleDateString('zh-CN');
         }
 
         // 初始化
-        window   窗口.onload = init   初始化;
-    </   & lt;script>
+        window.onload = init;
+    </script>
 </body>
-      </html>
+</html>
